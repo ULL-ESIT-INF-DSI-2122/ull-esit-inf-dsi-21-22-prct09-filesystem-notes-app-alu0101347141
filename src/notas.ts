@@ -1,3 +1,4 @@
+import {notEqual} from 'assert';
 import * as chalk from 'chalk';
 import * as yargs from 'yargs';
 
@@ -84,6 +85,18 @@ export class NotasDB {
     this.usuarios.push(usuario);
   };
   /**
+   * Función para añadir una nota a un usuario
+   * @param {string} usuario
+   * @param {Nota} nota
+   */
+  addNoteByUser(usuario: string, nota: Nota) {
+    this.usuarios.forEach((u) => {
+      if (u.getName() == usuario) {
+        u.addNota(nota);
+      }
+    });
+  };
+  /**
   * Getter de usuarios
   * @return {User[]}
   */
@@ -91,15 +104,29 @@ export class NotasDB {
     return this.usuarios;
   };
   /**
-  * Getter de usuario concreto
-  * @param {string} nombre
+  * Getter de los nombres de los usuarios
+  * @return {string[]}
   */
-  getUser(nombre: string) {
+  getUsersNames(): string[] {
+    const nombres: string[] = [];
     this.usuarios.forEach((u) => {
+      nombres.push(u.getName());
+    });
+    return nombres;
+  };
+  /**
+   *
+   * @param {string} nombre
+   * @return {User}
+   */
+  getUser(nombre: string): User {
+    let i: number = 0;
+    this.usuarios.forEach((u, index) => {
       if (u.getName() === nombre) {
-        return u;
+        i = index;
       }
     });
+    return this.usuarios[i];
   };
 }
 
@@ -126,8 +153,24 @@ yargs.command({
     },
   },
   handler(argv) {
+    let error: boolean = false;
     if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string')) {
-      console.log(chalk.green('Añadida nota: ' + argv.title + ' ~ de ' + argv.user));
+      if (!db.getUsersNames().includes(argv.user)) {
+        const usuario = new User(argv.user);
+        db.addUser(usuario);
+      }
+
+      db.getUser(argv.user).getNotes().forEach((n) => {
+        if (argv.title == n.getTitle()) {
+          console.log(chalk.red('¡Ya existe esta nota!'));
+          error = true;
+        }
+      });
+
+      if (!error) {
+        const nota = new Nota(argv.title, argv.body);
+        db.addNoteByUser(argv.user, nota);
+      }
     }
   },
 });
