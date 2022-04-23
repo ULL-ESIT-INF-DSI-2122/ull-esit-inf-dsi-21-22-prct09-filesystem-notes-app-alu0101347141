@@ -28,7 +28,6 @@ export class User {
   /**
    * Constructor de la clase User
    * @param {string} name
-   * @param {Nota} notas
    */
   constructor(private name: string) {};
   /**
@@ -57,7 +56,19 @@ export class User {
  * Clase para representar una base de datos
  */
 export class NotasDB {
-
+  private usuarios: User[] = [];
+  /**
+   * Constructor de la clase User
+   * @param {string} databaseName
+   */
+  constructor(private databaseName: string) {};
+  /**
+   * Función para añadir un usuario
+   * @param {User} usuario
+   */
+  addUser(usuario: User) {
+    this.usuarios.push(usuario);
+  };
 }
 
 yargs.command({
