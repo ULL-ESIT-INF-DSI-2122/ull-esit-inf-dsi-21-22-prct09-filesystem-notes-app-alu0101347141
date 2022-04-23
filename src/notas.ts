@@ -19,6 +19,40 @@ export class Nota {
     return this.title;
   }
 }
+
+/**
+ * Clase para representar un usuario
+ */
+export class User {
+  private notas: Nota[] = [];
+  /**
+   * Constructor de la clase User
+   * @param {string} name
+   * @param {Nota} notas
+   */
+  constructor(private name: string) {};
+  /**
+   * Función para añadir una nota
+   * @param {Nota} nota
+   */
+  addNota(nota: Nota) {
+    this.notas.push(nota);
+  };
+  /**
+   * Función para borrar una nota
+   * @param {string} titulo
+   */
+  removeNota(titulo: string) {
+    let i: number = 0;
+    this.notas.forEach((n, index) => {
+      if (n.getTitle() == titulo) {
+        i = index;
+      }
+    });
+    this.notas.splice(i, 0);
+  };
+}
+
 yargs.command({
   command: 'add',
   describe: 'Añade una nueva nota',
