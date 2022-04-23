@@ -53,6 +53,13 @@ export class User {
   };
 }
 
+/**
+ * Clase para representar una base de datos
+ */
+export class NotasDB {
+
+}
+
 yargs.command({
   command: 'add',
   describe: 'Añade una nueva nota',
