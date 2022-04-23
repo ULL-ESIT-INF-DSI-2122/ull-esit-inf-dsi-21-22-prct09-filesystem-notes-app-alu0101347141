@@ -1,12 +1,13 @@
 import * as chalk from 'chalk';
 import * as yargs from 'yargs';
 import * as fs from 'fs';
+import {string} from 'yargs';
+import {json} from 'stream/consumers';
 
 /**
  * Clase para representar una nota
  */
 export class Nota {
-  private path: string;
   /**
    * Constructor de la clase Nota
    * @param {string} author
@@ -15,12 +16,14 @@ export class Nota {
    * @param {string} color
    */
   constructor(private author: string, private title: string, private content: string, private color: string) {
-    this.path = './notas/' + author + '/' + title;
-    const dir: string = './notas/' + author;
-    fs.writeFile(this.path, content, () => {
-      console.log('Se ha creado la nota ' + title + ' en ' + dir);
-    });
   };
+  /**
+   * Getter del autor
+   * @return {string}
+   */
+  getAuthor() {
+    return this.author;
+  }
   /**
    * Getter del titulo
    * @return {string}
@@ -42,13 +45,6 @@ export class Nota {
   getContent() {
     return this.content;
   }
-  /**
-   * Getter de path
-   * @return {string}
-   */
-  getPath() {
-    return this.path;
-  }
 }
 
 /**
@@ -61,9 +57,6 @@ export class User {
    * @param {string} name
    */
   constructor(private name: string) {
-    const dir: string = './notas/' + name + '/';
-    fs.promises.mkdir(dir, {recursive: true}).catch(console.error);
-    console.log('Creado directorio ' + dir);
   };
   /**
    * Getter de name
@@ -123,12 +116,6 @@ export class User {
       }
     });
     this.notas.splice(i, 0);
-    fs.unlink(this.notas[i].getPath(), (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
   };
 }
 
@@ -141,13 +128,20 @@ export class NotasDB {
    * Constructor de la clase User
    * @param {string} databaseName
    */
-  constructor(private databaseName: string) {};
+  constructor(private databaseName: string) {
+  };
   /**
    * Función para añadir un usuario
    * @param {User} usuario
    */
   addUser(usuario: User) {
     this.usuarios.push(usuario);
+    const dir: string = './notas/' + usuario.getName() + '/';
+    fs.mkdir(dir, {recursive: true}, (err) => {
+      if (err) {
+        return console.error(err);
+      }
+    });
   };
   /**
    * Función para añadir una nota a un usuario
@@ -160,6 +154,16 @@ export class NotasDB {
         u.addNota(nota);
       }
     });
+    const path = './notas/' + nota.getAuthor() + '/' + nota.getTitle();
+    const dir: string = './notas/' + nota.getAuthor();
+    fs.mkdir(dir, {recursive: true}, (err) => {
+      if (err) {
+        return console.error(err);
+      }
+      fs.writeFile(path, nota.getContent(), {flag: 'w+'}, () => {
+        console.log('Se ha creado la nota ' + nota.getTitle() + ' en ' + dir);
+      });
+    });
   };
   /**
    * Función para eliminar una nota de un usuario
@@ -170,6 +174,13 @@ export class NotasDB {
     this.usuarios.forEach((u) => {
       if (u.getName() == usuario) {
         u.removeNota(titulo);
+      }
+    });
+    const path = './notas/' + usuario + '/' + titulo;
+    fs.unlink(path, (err) => {
+      if (err) {
+        console.error(err);
+        return;
       }
     });
   };
@@ -187,6 +198,7 @@ export class NotasDB {
   getUsersNames(): string[] {
     const nombres: string[] = [];
     this.usuarios.forEach((u) => {
+      console.log(u.getName());
       nombres.push(u.getName());
     });
     return nombres;
@@ -208,16 +220,6 @@ export class NotasDB {
 }
 
 const db = new NotasDB('BaseDeDatos');
-
-const jonay = new User('jonay');
-const yara = new User('yara');
-const nota1 = new Nota('jonay', 'notaRoja', 'ES ROJA', 'rojo');
-const nota2 = new Nota('jonay', 'notaVerde', 'ES VERDE', 'verde');
-jonay.addNota(nota1);
-jonay.addNota(nota2);
-db.addUser(jonay);
-db.addUser(yara);
-
 
 yargs.command({
   command: 'add',
@@ -248,24 +250,38 @@ yargs.command({
     let error: boolean = false;
     if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string') &&
     (typeof argv.color === 'string')) {
-      if (!db.getUsersNames().includes(argv.user)) {
-        const usuario = new User(argv.user);
-        db.addUser(usuario);
-        console.log(chalk.yellow('Creado el usuario ' + argv.user));
-      }
+      const user: string = argv.user;
+      const title: string = argv.title;
+      const body: string = argv.body;
+      const color: string = argv.color;
 
-      db.getUser(argv.user).getNotes().forEach((n) => {
-        if (argv.title == n.getTitle()) {
+      const dir: string = './notas/' + argv.user;
+      const notasUsuario: string[] = [];
+      fs.readdir(dir, (err, notas) => {
+        if (err) {
+        } else {
+          notas.forEach((nota) => {
+            notasUsuario.push(nota);
+          });
+        };
+        if (notasUsuario.includes(title)) {
           console.log(chalk.red('¡Ya existe esta nota!'));
           error = true;
         }
+        if (!error) {
+          const path = './notas/' + argv.user + '/' + argv.title;
+          const dir: string = './notas/' + argv.user;
+          fs.mkdir(dir, {recursive: true}, (err) => {
+            if (err) {
+            }
+            const json: string = JSON.stringify({title: title, user: user, body: body, color: color});
+            fs.writeFile(path, json, {flag: 'w+'}, () => {
+              console.log('Se ha creado la nota ' + argv.title + ' en ' + dir);
+            });
+          });
+          console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
+        }
       });
-
-      if (!error) {
-        const nota = new Nota(argv.user, argv.title, argv.body, argv.color);
-        db.addNoteByUser(argv.user, nota);
-        console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
-      }
     }
   },
 });
@@ -282,30 +298,54 @@ yargs.command({
   },
   handler(argv) {
     {
-      let error: boolean = false;
       if (typeof argv.user === 'string') {
-        if (!db.getUsersNames().includes(argv.user)) {
-          console.log(chalk.red('No existe el usuario ' + argv.user));
-          error = true;
-        }
-        if (!error) {
-          db.getUser(argv.user).getNotes().forEach((n) => {
-            switch (n.getColor()) {
-              case 'rojo':
-                console.log(chalk.red(n.getTitle()));
-                break;
-              case 'verde':
-                console.log(chalk.green(n.getTitle()));
-                break;
-              case 'azul':
-                console.log(chalk.blue(n.getTitle()));
-                break;
-              case 'amarillo':
-                console.log(chalk.yellow(n.getTitle()));
-                break;
-            }
-          });
-        }
+        const user: string = argv.user;
+        const dir: string = './notas/';
+        const listaUsuarios: string[] = [];
+        fs.readdir(dir, (err, usuarios) => {
+          if (err) {
+          } else {
+            usuarios.forEach((usuario) => {
+              listaUsuarios.push(usuario);
+            });
+          };
+          if (!listaUsuarios.includes(user)) {
+            console.log(chalk.red('No existe el usuario ' + argv.user));
+          } else {
+            const dirUser: string = './notas/' + argv.user;
+            fs.readdir(dirUser, (err, notas) => {
+              if (err) {
+              } else {
+                notas.forEach((nota) => {
+                  let contenido: string = '';
+                  const pathNota: string = dirUser + '/' + nota;
+                  fs.readFile(pathNota, (err, data) => {
+                    if (err) {
+                      console.log('ERROR');
+                    } else {
+                      contenido = data.toString();
+                      const json = JSON.parse(contenido);
+                      switch (json.color) {
+                        case 'rojo':
+                          console.log(chalk.red(nota));
+                          break;
+                        case 'verde':
+                          console.log(chalk.green(nota));
+                          break;
+                        case 'azul':
+                          console.log(chalk.blue(nota));
+                          break;
+                        case 'amarillo':
+                          console.log(chalk.yellow(nota));
+                          break;
+                      }
+                    }
+                  });
+                });
+              };
+            });
+          }
+        });
       }
     }
   },
