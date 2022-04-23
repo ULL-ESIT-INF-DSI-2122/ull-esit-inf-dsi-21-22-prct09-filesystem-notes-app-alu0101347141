@@ -31,6 +31,20 @@ export class User {
    */
   constructor(private name: string) {};
   /**
+   * Getter de name
+   * @return {string}
+   */
+  getName() {
+    return this.name;
+  }
+  /**
+   * Getter de notes
+   * @return {string}
+   */
+  getNotes() {
+    return this.notas;
+  }
+  /**
    * Función para añadir una nota
    * @param {Nota} nota
    */
@@ -69,7 +83,27 @@ export class NotasDB {
   addUser(usuario: User) {
     this.usuarios.push(usuario);
   };
+  /**
+  * Getter de usuarios
+  * @return {User[]}
+  */
+  getUsers() {
+    return this.usuarios;
+  };
+  /**
+  * Getter de usuario concreto
+  * @param {string} nombre
+  */
+  getUser(nombre: string) {
+    this.usuarios.forEach((u) => {
+      if (u.getName() === nombre) {
+        return u;
+      }
+    });
+  };
 }
+
+const db = new NotasDB('BaseDeDatos');
 
 yargs.command({
   command: 'add',
@@ -92,7 +126,7 @@ yargs.command({
     },
   },
   handler(argv) {
-    if ((typeof argv.title === 'string') && (typeof argv.title === 'string')) {
+    if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string')) {
       console.log(chalk.green('Añadida nota: ' + argv.title + ' ~ de ' + argv.user));
     }
   },
@@ -133,7 +167,7 @@ yargs.command({
     },
   },
   handler(argv) {
-    if ((typeof argv.title === 'string') && (typeof argv.title === 'string')) {
+    if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
       console.log(chalk.blue('Eliminada nota: ' + argv.title));
     }
   },
