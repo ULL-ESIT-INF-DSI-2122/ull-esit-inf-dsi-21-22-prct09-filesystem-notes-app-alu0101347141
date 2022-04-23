@@ -47,10 +47,21 @@ export class User {
   }
   /**
    * Getter de notes
-   * @return {string}
+   * @return {Nota[]}
    */
   getNotes() {
     return this.notas;
+  }
+  /**
+   * Getter de titulos de las notas
+   * @return {string[]}
+   */
+  getNotesTitles() {
+    const titulos: string[] = [];
+    this.notas.forEach((n) => {
+      titulos.push(n.getTitle());
+    });
+    return titulos;
   }
   /**
    * Función para añadir una nota
@@ -104,6 +115,18 @@ export class NotasDB {
     });
   };
   /**
+   * Función para eliminar una nota de un usuario
+   * @param {string} usuario
+   * @param {string} titulo
+   */
+  removeNoteByUser(usuario: string, titulo: string) {
+    this.usuarios.forEach((u) => {
+      if (u.getName() == usuario) {
+        u.removeNota(titulo);
+      }
+    });
+  };
+  /**
   * Getter de usuarios
   * @return {User[]}
   */
@@ -138,14 +161,14 @@ export class NotasDB {
 }
 
 const db = new NotasDB('BaseDeDatos');
-/**
+
 const jonay = new User('jonay');
 const nota1 = new Nota('notaRoja', 'ES ROJA', 'rojo');
 const nota2 = new Nota('notaVerde', 'ES VERDE', 'verde');
 jonay.addNota(nota1);
 jonay.addNota(nota2);
 db.addUser(jonay);
-*/
+
 
 yargs.command({
   command: 'add',
@@ -250,8 +273,22 @@ yargs.command({
     },
   },
   handler(argv) {
+    let error: boolean = false;
     if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
-      console.log(chalk.blue('Eliminada nota: ' + argv.title));
+      if (!db.getUsersNames().includes(argv.user)) {
+        console.log(chalk.red('No existe el usuario ' + argv.user));
+        error = true;
+      }
+
+      if (!db.getUser(argv.user).getNotesTitles().includes(argv.title)) {
+        console.log(chalk.red('No existe la nota [' + argv.title + '] del usuario ' + argv.user));
+        error = true;
+      }
+
+      if (!error) {
+        db.removeNoteByUser(argv.user, argv.title);
+        console.log(chalk.green('Se ha eliminado la nota [' + argv.title + '] del usuario ' + argv.user));
+      }
     }
   },
 });
