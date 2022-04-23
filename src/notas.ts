@@ -1,4 +1,3 @@
-import {notEqual} from 'assert';
 import * as chalk from 'chalk';
 import * as yargs from 'yargs';
 
@@ -10,14 +9,22 @@ export class Nota {
    * Constructor de la clase Nota
    * @param {string} title
    * @param {string} content
+   * @param {string} color
    */
-  constructor(private title: string, private content: string) {};
+  constructor(private title: string, private content: string, private color: string) {};
   /**
    * Getter del titulo
    * @return {string}
    */
   getTitle() {
     return this.title;
+  }
+  /**
+   * Getter del color
+   * @return {string}
+   */
+  getColor() {
+    return this.color;
   }
 }
 
@@ -131,6 +138,14 @@ export class NotasDB {
 }
 
 const db = new NotasDB('BaseDeDatos');
+/**
+const jonay = new User('jonay');
+const nota1 = new Nota('notaRoja', 'ES ROJA', 'rojo');
+const nota2 = new Nota('notaVerde', 'ES VERDE', 'verde');
+jonay.addNota(nota1);
+jonay.addNota(nota2);
+db.addUser(jonay);
+*/
 
 yargs.command({
   command: 'add',
@@ -151,10 +166,16 @@ yargs.command({
       demandOption: true,
       type: 'string',
     },
+    color: {
+      describe: 'Color de la nota',
+      demandOption: true,
+      type: 'string',
+    },
   },
   handler(argv) {
     let error: boolean = false;
-    if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string')) {
+    if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string') &&
+    (argv.color === 'string')) {
       if (!db.getUsersNames().includes(argv.user)) {
         const usuario = new User(argv.user);
         db.addUser(usuario);
@@ -168,8 +189,9 @@ yargs.command({
       });
 
       if (!error) {
-        const nota = new Nota(argv.title, argv.body);
+        const nota = new Nota(argv.title, argv.body, argv.color);
         db.addNoteByUser(argv.user, nota);
+        console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
       }
     }
   },
@@ -186,10 +208,28 @@ yargs.command({
     },
   },
   handler(argv) {
-    if (typeof argv.user === 'string') {
-      console.log(chalk.blue.inverse('Notas de: ' + argv.user));
-      console.log(chalk.blue('Nota 1'));
-      console.log(chalk.blue('Nota 2'));
+    {
+      if (typeof argv.user === 'string') {
+        if (!db.getUsersNames().includes(argv.user)) {
+          console.log(chalk.red('No existe el usuario ' + argv.user));
+        }
+        db.getUser(argv.user).getNotes().forEach((n) => {
+          switch (n.getColor()) {
+            case 'rojo':
+              console.log(chalk.red(n.getTitle()));
+              break;
+            case 'verde':
+              console.log(chalk.green(n.getTitle()));
+              break;
+            case 'azul':
+              console.log(chalk.blue(n.getTitle()));
+              break;
+            case 'amarillo':
+              console.log(chalk.yellow(n.getTitle()));
+              break;
+          }
+        });
+      }
     }
   },
 });
