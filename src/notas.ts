@@ -26,6 +26,13 @@ export class Nota {
   getColor() {
     return this.color;
   }
+  /**
+   * Getter del contenido
+   * @return {string}
+   */
+  getContent() {
+    return this.content;
+  }
 }
 
 /**
@@ -51,6 +58,20 @@ export class User {
    */
   getNotes() {
     return this.notas;
+  }
+  /**
+   *
+   * @param {string} titulo
+   * @return {Nota}
+   */
+  getNoteByTitle(titulo: string): Nota {
+    let i: number = 0;
+    this.notas.forEach((n, index) => {
+      if (n.getTitle() == titulo) {
+        i = index;
+      }
+    });
+    return this.notas[i];
   }
   /**
    * Getter de titulos de las notas
@@ -292,5 +313,59 @@ yargs.command({
     }
   },
 });
+
+yargs.command({
+  command: 'open',
+  describe: 'Muestra el contenido de una nota',
+  builder: {
+    user: {
+      describe: 'Autor de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+    title: {
+      describe: 'Titulo de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+  },
+  handler(argv) {
+    let error: boolean = false;
+    if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
+      if (!db.getUsersNames().includes(argv.user)) {
+        console.log(chalk.red('No existe el usuario ' + argv.user));
+        error = true;
+      }
+
+      if (!db.getUser(argv.user).getNotesTitles().includes(argv.title)) {
+        console.log(chalk.red('No existe la nota [' + argv.title + '] del usuario ' + argv.user));
+        error = true;
+      }
+
+      if (!error) {
+        const nota: Nota = db.getUser(argv.user).getNoteByTitle(argv.title);
+        switch (nota.getColor()) {
+          case 'rojo':
+            console.log(chalk.red(nota.getTitle() + ' [de ' + argv.user + ']'));
+            console.log(chalk.red('----\n' + nota.getContent()));
+            break;
+          case 'verde':
+            console.log(chalk.green(nota.getTitle() + ' [de ' + argv.user + ']'));
+            console.log(chalk.green('----\n' + nota.getContent()));
+            break;
+          case 'azul':
+            console.log(chalk.blue(nota.getTitle() + ' [de ' + argv.user + ']'));
+            console.log(chalk.blue('----\n' + nota.getContent()));
+            break;
+          case 'amarillo':
+            console.log(chalk.yellow(nota.getTitle() + ' [de ' + argv.user + ']'));
+            console.log(chalk.yellow('----\n' + nota.getContent()));
+            break;
+        }
+      }
+    }
+  },
+});
+
 
 yargs.parse();
