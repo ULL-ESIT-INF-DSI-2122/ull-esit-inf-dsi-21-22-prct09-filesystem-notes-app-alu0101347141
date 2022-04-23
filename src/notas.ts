@@ -1,17 +1,26 @@
 import * as chalk from 'chalk';
 import * as yargs from 'yargs';
+import * as fs from 'fs';
 
 /**
  * Clase para representar una nota
  */
 export class Nota {
+  private path: string;
   /**
    * Constructor de la clase Nota
+   * @param {string} author
    * @param {string} title
    * @param {string} content
    * @param {string} color
    */
-  constructor(private title: string, private content: string, private color: string) {};
+  constructor(private author: string, private title: string, private content: string, private color: string) {
+    this.path = './notas/' + author + '/' + title;
+    const dir: string = './notas/' + author;
+    fs.writeFile(this.path, content, () => {
+      console.log('Se ha creado la nota ' + title + ' en ' + dir);
+    });
+  };
   /**
    * Getter del titulo
    * @return {string}
@@ -33,6 +42,13 @@ export class Nota {
   getContent() {
     return this.content;
   }
+  /**
+   * Getter de path
+   * @return {string}
+   */
+  getPath() {
+    return this.path;
+  }
 }
 
 /**
@@ -44,7 +60,11 @@ export class User {
    * Constructor de la clase User
    * @param {string} name
    */
-  constructor(private name: string) {};
+  constructor(private name: string) {
+    const dir: string = './notas/' + name + '/';
+    fs.promises.mkdir(dir, {recursive: true}).catch(console.error);
+    console.log('Creado directorio ' + dir);
+  };
   /**
    * Getter de name
    * @return {string}
@@ -103,6 +123,12 @@ export class User {
       }
     });
     this.notas.splice(i, 0);
+    fs.unlink(this.notas[i].getPath(), (err) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    });
   };
 }
 
@@ -184,11 +210,13 @@ export class NotasDB {
 const db = new NotasDB('BaseDeDatos');
 
 const jonay = new User('jonay');
-const nota1 = new Nota('notaRoja', 'ES ROJA', 'rojo');
-const nota2 = new Nota('notaVerde', 'ES VERDE', 'verde');
+const yara = new User('yara');
+const nota1 = new Nota('jonay', 'notaRoja', 'ES ROJA', 'rojo');
+const nota2 = new Nota('jonay', 'notaVerde', 'ES VERDE', 'verde');
 jonay.addNota(nota1);
 jonay.addNota(nota2);
 db.addUser(jonay);
+db.addUser(yara);
 
 
 yargs.command({
@@ -219,10 +247,11 @@ yargs.command({
   handler(argv) {
     let error: boolean = false;
     if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string') &&
-    (argv.color === 'string')) {
+    (typeof argv.color === 'string')) {
       if (!db.getUsersNames().includes(argv.user)) {
         const usuario = new User(argv.user);
         db.addUser(usuario);
+        console.log(chalk.yellow('Creado el usuario ' + argv.user));
       }
 
       db.getUser(argv.user).getNotes().forEach((n) => {
@@ -233,7 +262,7 @@ yargs.command({
       });
 
       if (!error) {
-        const nota = new Nota(argv.title, argv.body, argv.color);
+        const nota = new Nota(argv.user, argv.title, argv.body, argv.color);
         db.addNoteByUser(argv.user, nota);
         console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
       }
@@ -253,26 +282,30 @@ yargs.command({
   },
   handler(argv) {
     {
+      let error: boolean = false;
       if (typeof argv.user === 'string') {
         if (!db.getUsersNames().includes(argv.user)) {
           console.log(chalk.red('No existe el usuario ' + argv.user));
+          error = true;
         }
-        db.getUser(argv.user).getNotes().forEach((n) => {
-          switch (n.getColor()) {
-            case 'rojo':
-              console.log(chalk.red(n.getTitle()));
-              break;
-            case 'verde':
-              console.log(chalk.green(n.getTitle()));
-              break;
-            case 'azul':
-              console.log(chalk.blue(n.getTitle()));
-              break;
-            case 'amarillo':
-              console.log(chalk.yellow(n.getTitle()));
-              break;
-          }
-        });
+        if (!error) {
+          db.getUser(argv.user).getNotes().forEach((n) => {
+            switch (n.getColor()) {
+              case 'rojo':
+                console.log(chalk.red(n.getTitle()));
+                break;
+              case 'verde':
+                console.log(chalk.green(n.getTitle()));
+                break;
+              case 'azul':
+                console.log(chalk.blue(n.getTitle()));
+                break;
+              case 'amarillo':
+                console.log(chalk.yellow(n.getTitle()));
+                break;
+            }
+          });
+        }
       }
     }
   },
