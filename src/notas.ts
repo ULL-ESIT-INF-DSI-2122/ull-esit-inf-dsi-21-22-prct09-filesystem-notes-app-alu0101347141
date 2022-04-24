@@ -53,11 +53,12 @@ yargs.command({
                   console.log(chalk.red('No se pudo crear el directorio del usuario' + argv.user));
                 }
                 const json: string = JSON.stringify({title: title, user: user, body: body, color: color});
-                fs.writeFile(path, json, {flag: 'w+'}, () => {
-                  console.log('Se ha creado la nota ' + argv.title + ' en ' + dir);
+                fs.writeFile(path, json, (err) => {
+                  if (err) {
+                    console.log(chalk.red('No se pudo añadir la nota [' + argv.title + '] del usuario ' + argv.user));
+                  } else console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
                 });
               });
-              console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
             }
           });
         }
@@ -161,6 +162,7 @@ yargs.command({
               if (err) {
                 console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
               } else {
+                console.log(chalk.green('Mostradas notas de ' + user + '\n-------------------------'));
                 notas.forEach((nota) => {
                   let contenido: string = '';
                   const pathNota: string = dirUser + '/' + nota;
@@ -172,16 +174,16 @@ yargs.command({
                       const json = JSON.parse(contenido);
                       switch (json.color) {
                         case 'rojo':
-                          console.log(chalk.red(nota));
+                          console.log(chalk.red('- ' + nota));
                           break;
                         case 'verde':
-                          console.log(chalk.green(nota));
+                          console.log(chalk.green('- ' + nota));
                           break;
                         case 'azul':
-                          console.log(chalk.blue(nota));
+                          console.log(chalk.blue('- ' + nota));
                           break;
                         case 'amarillo':
-                          console.log(chalk.yellow(nota));
+                          console.log(chalk.yellow('- ' + nota));
                           break;
                       }
                     }
@@ -301,6 +303,7 @@ yargs.command({
                     if (err) {
                       console.log(chalk.red('No se pudo leer el fichero'));
                     } else {
+                      console.log(chalk.green('Mostrando ' + title + ', de ' + user + '\n----------------------\n'));
                       contenido = data.toString();
                       const json = JSON.parse(contenido);
                       switch (json.color) {
