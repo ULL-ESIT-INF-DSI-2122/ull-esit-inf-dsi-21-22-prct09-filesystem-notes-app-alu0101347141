@@ -28,7 +28,6 @@ yargs.command({
     },
   },
   handler(argv) {
-    let error: boolean = false;
     if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.body === 'string') &&
     (typeof argv.color === 'string')) {
       const user: string = argv.user;
@@ -37,32 +36,101 @@ yargs.command({
       const color: string = argv.color;
 
       const dir: string = './notas/' + argv.user;
-      const notasUsuario: string[] = [];
-      fs.readdir(dir, (err, notas) => {
+      fs.mkdir(dir, {recursive: true}, (err) => {
         if (err) {
+          console.log(chalk.red('No se pudo crear el directorio general' + argv.user));
         } else {
-          notas.forEach((nota) => {
-            notasUsuario.push(nota);
-          });
-        };
-        if (notasUsuario.includes(title)) {
-          console.log(chalk.red('¡Ya existe esta nota!'));
-          error = true;
-        }
-        if (!error) {
-          const path = './notas/' + argv.user + '/' + argv.title;
-          const dir: string = './notas/' + argv.user;
-          fs.mkdir(dir, {recursive: true}, (err) => {
+          fs.readdir(dir, (err, notas) => {
             if (err) {
+              console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
+            } else if (notas.includes(title)) {
+              console.log(chalk.red('¡Ya existe esta nota!'));
+            } else {
+              const path = './notas/' + argv.user + '/' + argv.title;
+              const dir: string = './notas/' + argv.user;
+              fs.mkdir(dir, {recursive: true}, (err) => {
+                if (err) {
+                  console.log(chalk.red('No se pudo crear el directorio del usuario' + argv.user));
+                }
+                const json: string = JSON.stringify({title: title, user: user, body: body, color: color});
+                fs.writeFile(path, json, {flag: 'w+'}, () => {
+                  console.log('Se ha creado la nota ' + argv.title + ' en ' + dir);
+                });
+              });
+              console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
             }
-            const json: string = JSON.stringify({title: title, user: user, body: body, color: color});
-            fs.writeFile(path, json, {flag: 'w+'}, () => {
-              console.log('Se ha creado la nota ' + argv.title + ' en ' + dir);
-            });
           });
-          console.log(chalk.green('Se ha añadido la nota [' + argv.title + '] del usuario ' + argv.user));
         }
       });
+    }
+  },
+});
+
+
+yargs.command({
+  command: 'modify',
+  describe: 'Muestra el contenido de una nota',
+  builder: {
+    user: {
+      describe: 'Autor de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+    title: {
+      describe: 'Titulo de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+    edit: {
+      describe: 'Nuevo contenido de la nota',
+      demandOption: true,
+      type: 'string',
+    },
+  },
+  handler(argv) {
+    {
+      if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.edit === 'string')) {
+        const user: string = argv.user;
+        const title: string = argv.title;
+        const contenido: string = argv.edit;
+        const dir: string = './notas/';
+        fs.readdir(dir, (err, usuarios) => {
+          if (err) {
+            console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+          } else if (!usuarios.includes(user)) {
+            console.log(chalk.red('No existe el usuario ' + argv.user));
+          } else {
+            const dirUser: string = './notas/' + argv.user;
+            fs.readdir(dirUser, (err, notas) => {
+              if (err) {
+                console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
+              } else {
+                if (!notas.includes(title)) {
+                  console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
+                } else {
+                  const pathNota: string = dirUser + '/' + title;
+                  fs.readFile(pathNota, (err, data) => {
+                    if (err) {
+                      console.log(chalk.red('No se pudo leer el fichero a modificar'));
+                    } else {
+                      const noteData = data.toString();
+                      const json = JSON.parse(noteData);
+                      const newNoteData: string = JSON.stringify({title: json.title, user: json.user, body: contenido, color: json.color});
+                      fs.writeFile(pathNota, newNoteData, (err) => {
+                        if (err) {
+                          console.log(chalk.red('No se pudo sobreescribir el fichero'));
+                        } else {
+                          console.log(chalk.green('Se modificó correctamente la nota'));
+                        }
+                      });
+                    }
+                  });
+                };
+              }
+            });
+          }
+        });
+      }
     }
   },
 });
@@ -82,27 +150,23 @@ yargs.command({
       if (typeof argv.user === 'string') {
         const user: string = argv.user;
         const dir: string = './notas/';
-        const listaUsuarios: string[] = [];
         fs.readdir(dir, (err, usuarios) => {
           if (err) {
-          } else {
-            usuarios.forEach((usuario) => {
-              listaUsuarios.push(usuario);
-            });
-          };
-          if (!listaUsuarios.includes(user)) {
+            console.log(chalk.red('No se pudo examinar el directorio en en busca de usuarios'));
+          } else if (!usuarios.includes(user)) {
             console.log(chalk.red('No existe el usuario ' + argv.user));
           } else {
             const dirUser: string = './notas/' + argv.user;
             fs.readdir(dirUser, (err, notas) => {
               if (err) {
+                console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
               } else {
                 notas.forEach((nota) => {
                   let contenido: string = '';
                   const pathNota: string = dirUser + '/' + nota;
                   fs.readFile(pathNota, (err, data) => {
                     if (err) {
-                      console.log('ERROR');
+                      console.log(chalk.red('No se pudo leer el fichero'));
                     } else {
                       contenido = data.toString();
                       const json = JSON.parse(contenido);
@@ -153,24 +217,21 @@ yargs.command({
         const user: string = argv.user;
         const title: string = argv.title;
         const dir: string = './notas/';
-        const listaUsuarios: string[] = [];
         fs.readdir(dir, (err, usuarios) => {
           if (err) {
-          } else {
-            usuarios.forEach((usuario) => {
-              listaUsuarios.push(usuario);
-            });
-          };
-          if (!listaUsuarios.includes(user)) {
+            console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+          } else if (!usuarios.includes(user)) {
             console.log(chalk.red('No existe el usuario ' + argv.user));
           } else {
             const dirUser: string = './notas/' + argv.user;
             fs.readdir(dirUser, (err, notas) => {
               if (err) {
+                console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
               } else {
                 const listaNotas: string[] = [];
                 fs.readdir(dirUser, (err, notas) => {
                   if (err) {
+                    console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
                   } else {
                     notas.forEach((nota) => {
                       listaNotas.push(nota);
@@ -182,7 +243,7 @@ yargs.command({
                     const path = './notas/' + user + '/' + title;
                     fs.unlink(path, (err) => {
                       if (err) {
-                        console.error(err);
+                        console.log(chalk.red('No se pudo eliminar el fichero'));
                         return;
                       } else {
                         console.log(chalk.green('Eliminada la nota ' + title + ' de ' + user));
@@ -220,20 +281,16 @@ yargs.command({
         const user: string = argv.user;
         const title: string = argv.title;
         const dir: string = './notas/';
-        const listaUsuarios: string[] = [];
         fs.readdir(dir, (err, usuarios) => {
           if (err) {
-          } else {
-            usuarios.forEach((usuario) => {
-              listaUsuarios.push(usuario);
-            });
-          };
-          if (!listaUsuarios.includes(user)) {
+            console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+          } else if (!usuarios.includes(user)) {
             console.log(chalk.red('No existe el usuario ' + argv.user));
           } else {
             const dirUser: string = './notas/' + argv.user;
             fs.readdir(dirUser, (err, notas) => {
               if (err) {
+                console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
               } else {
                 if (!notas.includes(title)) {
                   console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
@@ -242,7 +299,7 @@ yargs.command({
                   const pathNota: string = dirUser + '/' + title;
                   fs.readFile(pathNota, (err, data) => {
                     if (err) {
-                      console.log('ERROR');
+                      console.log(chalk.red('No se pudo leer el fichero'));
                     } else {
                       contenido = data.toString();
                       const json = JSON.parse(contenido);
