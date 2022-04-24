@@ -230,16 +230,10 @@ yargs.command({
               if (err) {
                 console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
               } else {
-                const listaNotas: string[] = [];
                 fs.readdir(dirUser, (err, notas) => {
                   if (err) {
                     console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
-                  } else {
-                    notas.forEach((nota) => {
-                      listaNotas.push(nota);
-                    });
-                  };
-                  if (!listaNotas.includes(title)) {
+                  } else if (!notas.includes(title)) {
                     console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
                   } else {
                     const path = './notas/' + user + '/' + title;

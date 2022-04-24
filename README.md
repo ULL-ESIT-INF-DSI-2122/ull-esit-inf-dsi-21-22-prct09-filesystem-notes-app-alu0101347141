@@ -237,3 +237,219 @@ A partir del comando add podemos sacar una serie de herramientas y soluciones pa
         - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
         - Se itera sobre cada entrada del directorio&emsp;⟶&emsp;forEach()
           - Se convierte el contenido de la nota en un JSON y se evalúa el atributo *color* en un switch. Dependiendo del color que contenga, se muestra el atributo *title* de un color o de otro.
+
+<br>
+
+## · Comando **remove**<br> 
+> Permite eliminar una nota
+
+<br>
+
+### > Parámetros
+
+    yargs.command({
+    command: 'remove',
+    describe: 'Elimina una nota',
+    builder: {
+      user: {
+        describe: 'Autor de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+      title: {
+        describe: 'Titulo de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+    },
+    .
+    . handler(argv) {}
+    .
+    });
+
+- Este comando recibirá dos parámetros:
+  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - --title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+
+<br>
+
+### > Manejador
+
+    handler(argv) {
+      {
+        if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
+          const user: string = argv.user;
+          const title: string = argv.title;
+          const dir: string = './notas/';
+          fs.readdir(dir, (err, usuarios) => {
+            if (err) {
+              console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+            } else if (!usuarios.includes(user)) {
+              console.log(chalk.red('No existe el usuario ' + argv.user));
+            } else {
+              const dirUser: string = './notas/' + argv.user;
+              fs.readdir(dirUser, (err, notas) => {
+                if (err) {
+                  console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
+                } else if (!notas.includes(title)) {
+                      console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
+                    } else {
+                      const path = './notas/' + user + '/' + title;
+                      fs.unlink(path, (err) => {
+                        if (err) {
+                          console.log(chalk.red('No se pudo eliminar el fichero'));
+                          return;
+                        } else {
+                          console.log(chalk.green('Eliminada la nota ' + title + ' de ' + user));
+                        }
+                      });
+                    }
+                  });
+                };
+              });
+            }
+          });
+        }
+      }
+    },
+
+Esquema de decisiones:
+
+- Se comprueba que user y title contienen una string
+  - Se recorre el directorio /notas&emsp;⟶&emsp;fs.readdir()
+    - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - ¿No encuentra al usuario?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - Se encuentra al usuario
+      - Se recorre el directorio /notas/user&emsp;⟶&emsp;fs.readdir()
+        - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - Se elimina el fichero&emsp;⟶&emsp;fs.unlink()
+          - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+          - ¿Éxito?&emsp;⟶&emsp;console.log(chalk.green('éxito'))
+
+<br>
+
+## · Comando **open**<br> 
+> Permite abrir una nota (mostrar su contenido)
+
+<br>
+
+### > Parámetros
+
+    yargs.command({
+    command: 'remove',
+    describe: 'Elimina una nota',
+    builder: {
+      user: {
+        describe: 'Autor de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+      title: {
+        describe: 'Titulo de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+    },
+    .
+    . handler(argv) {}
+    .
+    });
+
+- Este comando recibirá dos parámetros:
+  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - --title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+
+<br>
+
+### > Manejador
+
+    handler(argv) {
+      {
+        if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
+          const user: string = argv.user;
+          const title: string = argv.title;
+          const dir: string = './notas/';
+          fs.readdir(dir, (err, usuarios) => {
+            if (err) {
+              console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+            } else if (!usuarios.includes(user)) {
+              console.log(chalk.red('No existe el usuario ' + argv.user));
+            } else {
+              const dirUser: string = './notas/' + argv.user;
+              fs.readdir(dirUser, (err, notas) => {
+                if (err) {
+                  console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
+                } else {
+                  if (!notas.includes(title)) {
+                    console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
+                  } else {
+                    let contenido: string = '';
+                    const pathNota: string = dirUser + '/' + title;
+                    fs.readFile(pathNota, (err, data) => {
+                      if (err) {
+                        console.log(chalk.red('No se pudo leer el fichero'));
+                      } else {
+                        console.log(chalk.green('Mostrando ' + title + ', de ' + user + '\n----------------------\n'));
+                        contenido = data.toString();
+                        const json = JSON.parse(contenido);
+                        switch (json.color) {
+                          case 'rojo':
+                            console.log(chalk.red(json.body));
+                            break;
+                          case 'verde':
+                            console.log(chalk.green(json.body));
+                            break;
+                          case 'azul':
+                            console.log(chalk.blue(json.body));
+                            break;
+                          case 'amarillo':
+                            console.log(chalk.yellow(json.body));
+                            break;
+                            console.log(chalk.yellow(json.body));
+                            break;
+                        }
+                      }
+                    });
+                  };
+                }
+              });
+            }
+          });
+        }
+      }
+    },
+
+Esquema de decisiones:
+
+- Se comprueba que user y title contienen una string
+  - Se recorre el directorio /notas&emsp;⟶&emsp;fs.readdir()
+    - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - ¿No encuentra al usuario?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - Se encuentra al usuario
+      - Se recorre el directorio /notas/user&emsp;⟶&emsp;fs.readdir()
+        - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - Se lee el fichero&emsp;⟶&emsp;fs.readFile()
+          - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+          - ¿Éxito?&emsp;⟶&emsp;JSON a string con JSON.parse()
+            - Se utiliza el atributo color para evaluar en qué color se mostrará por pantalla
+              - Se muestra el contenido del atributo body en el color seleccionado
+
+<br>
+
+---
+
+## Conclusión
+
+Terminamos nuestro código con un yargs.parse() y disfrutamos del correcto funcionamiento de la aplicación, cumpliendo con los objetivos propuestos y pudiendo probarlo con tan solo ejecutar los comandos que hemos preparado. Como se han indicado rutas relativas, el directorio *notas/* será creado en el directorio donde se ejecuten los comandos, y bajo esté serán creados los directorios de los usuarios con sus respectivas notas.
+
+Ahora sí, eso ha sido todo.
+
+---
+
+<br>
+
+_Desarrollado por Jonay Méndez Márquez_
+<br>
+_Última actualización: 24/04/2022_ 
+<br>
+_Para cualquier duda al respecto: alu0101347141@ull.edu.es_
