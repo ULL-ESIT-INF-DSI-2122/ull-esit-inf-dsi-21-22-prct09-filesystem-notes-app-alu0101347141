@@ -70,7 +70,7 @@ yargs.command({
 
 yargs.command({
   command: 'modify',
-  describe: 'Muestra el contenido de una nota',
+  describe: 'Edita el contenido de una nota',
   builder: {
     user: {
       describe: 'Autor de la nota',

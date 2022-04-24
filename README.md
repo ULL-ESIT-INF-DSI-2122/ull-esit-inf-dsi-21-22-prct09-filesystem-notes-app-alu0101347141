@@ -322,9 +322,115 @@ Esquema de decisiones:
     - Se encuentra al usuario
       - Se recorre el directorio /notas/user&emsp;⟶&emsp;fs.readdir()
         - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - ¿No se encuentra la nota?&emsp;⟶&emsp;console.log(chalk.red('error'))
         - Se elimina el fichero&emsp;⟶&emsp;fs.unlink()
           - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
           - ¿Éxito?&emsp;⟶&emsp;console.log(chalk.green('éxito'))
+
+<br>
+
+## · Comando **modify**<br> 
+> Permite editar una nota
+
+<br>
+
+### > Parámetros
+
+    yargs.command({
+    command: 'modify',
+    describe: 'Edita el contenido de una nota',
+    builder: {
+      user: {
+        describe: 'Autor de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+      title: {
+        describe: 'Titulo de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+      edit: {
+        describe: 'Nuevo contenido de la nota',
+        demandOption: true,
+        type: 'string',
+      },
+    },
+    .
+    . handler(argv) {}
+    .
+    });
+
+- Este comando recibirá tres parámetros:
+  - **\--user**&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - **\--title**&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - **\--edit**&emsp;⟶&emsp;Nuevo contenido de la nota **[obligatorio]**
+
+<br>
+
+### > Manejador
+
+      handler(argv) {
+      {
+        if ((typeof argv.user === 'string') && (typeof argv.title === 'string') && (typeof argv.edit === 'string')) {
+          const user: string = argv.user;
+          const title: string = argv.title;
+          const contenido: string = argv.edit;
+          const dir: string = './notas/';
+          fs.readdir(dir, (err, usuarios) => {
+            if (err) {
+              console.log(chalk.red('No se pudo examinar el directorio en busca de usuarios'));
+            } else if (!usuarios.includes(user)) {
+              console.log(chalk.red('No existe el usuario ' + argv.user));
+            } else {
+              const dirUser: string = './notas/' + argv.user;
+              fs.readdir(dirUser, (err, notas) => {
+                if (err) {
+                  console.log(chalk.red('No se pudo examinar el directorio en busca de notas'));
+                } else {
+                  if (!notas.includes(title)) {
+                    console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
+                  } else {
+                    const pathNota: string = dirUser + '/' + title;
+                    fs.readFile(pathNota, (err, data) => {
+                      if (err) {
+                        console.log(chalk.red('No se pudo leer el fichero a modificar'));
+                      } else {
+                        const noteData = data.toString();
+                        const json = JSON.parse(noteData);
+                        const newNoteData: string = JSON.stringify({title: json.title, user: json.user, body: contenido, color: json.color});
+                        fs.writeFile(pathNota, newNoteData, (err) => {
+                          if (err) {
+                            console.log(chalk.red('No se pudo sobreescribir el fichero'));
+                          } else {
+                            console.log(chalk.green('Se modificó correctamente la nota'));
+                          }
+                        });
+                      }
+                    });
+                  };
+                }
+              });
+            }
+          });
+        }
+      }
+    },
+
+Esquema de decisiones:
+
+- Se comprueba que user y title contienen una string
+  - Se recorre el directorio /notas&emsp;⟶&emsp;fs.readdir()
+    - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - ¿No encuentra al usuario?&emsp;⟶&emsp;console.log(chalk.red('error'))
+    - Se encuentra al usuario
+      - Se recorre el directorio /notas/user&emsp;⟶&emsp;fs.readdir()
+        - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - ¿No se encuentra la nota?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - Se crea un nuevo JSON&emsp;⟶&emsp;Contendrá el JSON original de la nota pero, esta vez, en el atributo body irá el valor de *edit*. Se escribe el nuevo JSON en el fichero&emsp;⟶&emsp; fs.writeFile() 
+          - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+          - ¿Éxito?&emsp;⟶&emsp;console.log(chalk.green('éxito'))
+
 
 <br>
 
@@ -336,8 +442,8 @@ Esquema de decisiones:
 ### > Parámetros
 
     yargs.command({
-    command: 'remove',
-    describe: 'Elimina una nota',
+    command: 'open',
+    describe: 'Muestra el contenido de una nota',
     builder: {
       user: {
         describe: 'Autor de la nota',
@@ -428,6 +534,7 @@ Esquema de decisiones:
     - Se encuentra al usuario
       - Se recorre el directorio /notas/user&emsp;⟶&emsp;fs.readdir()
         - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
+        - ¿No se encuentra la nota?&emsp;⟶&emsp;console.log(chalk.red('error'))
         - Se lee el fichero&emsp;⟶&emsp;fs.readFile()
           - ¿Error?&emsp;⟶&emsp;console.log(chalk.red('error'))
           - ¿Éxito?&emsp;⟶&emsp;JSON a string con JSON.parse()
