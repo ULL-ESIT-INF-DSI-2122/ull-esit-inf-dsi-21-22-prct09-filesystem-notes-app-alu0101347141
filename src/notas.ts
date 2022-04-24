@@ -367,21 +367,52 @@ yargs.command({
     },
   },
   handler(argv) {
-    let error: boolean = false;
-    if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
-      if (!db.getUsersNames().includes(argv.user)) {
-        console.log(chalk.red('No existe el usuario ' + argv.user));
-        error = true;
-      }
-
-      if (!db.getUser(argv.user).getNotesTitles().includes(argv.title)) {
-        console.log(chalk.red('No existe la nota [' + argv.title + '] del usuario ' + argv.user));
-        error = true;
-      }
-
-      if (!error) {
-        db.removeNoteByUser(argv.user, argv.title);
-        console.log(chalk.green('Se ha eliminado la nota [' + argv.title + '] del usuario ' + argv.user));
+    {
+      if ((typeof argv.user === 'string') && (typeof argv.title === 'string')) {
+        const user: string = argv.user;
+        const title: string = argv.title;
+        const dir: string = './notas/';
+        const listaUsuarios: string[] = [];
+        fs.readdir(dir, (err, usuarios) => {
+          if (err) {
+          } else {
+            usuarios.forEach((usuario) => {
+              listaUsuarios.push(usuario);
+            });
+          };
+          if (!listaUsuarios.includes(user)) {
+            console.log(chalk.red('No existe el usuario ' + argv.user));
+          } else {
+            const dirUser: string = './notas/' + argv.user;
+            fs.readdir(dirUser, (err, notas) => {
+              if (err) {
+              } else {
+                const listaNotas: string[] = [];
+                fs.readdir(dirUser, (err, notas) => {
+                  if (err) {
+                  } else {
+                    notas.forEach((nota) => {
+                      listaNotas.push(nota);
+                    });
+                  };
+                  if (!listaNotas.includes(title)) {
+                    console.log(chalk.red('No existe la nota ' + title + ' de ' + user));
+                  } else {
+                    const path = './notas/' + user + '/' + title;
+                    fs.unlink(path, (err) => {
+                      if (err) {
+                        console.error(err);
+                        return;
+                      } else {
+                        console.log(chalk.green('Eliminada la nota ' + title + ' de ' + user));
+                      }
+                    });
+                  }
+                });
+              };
+            });
+          }
+        });
       }
     }
   },
