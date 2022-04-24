@@ -19,16 +19,16 @@ La aplicación tendrá una serie de objetivos básicos, aquellos que la permitan
 
   - La podrán utilizar distintos usuarios&emsp;⟶&emsp;Para esto se almacenará y buscará cada nota en el directorio que corresponda a su autor.
   - Una nota estará formada por:
-    - Título&emsp;⟶&emsp;Breve texto que nos permitirá identificarla
-    - Autor&emsp;⟶&emsp;Usuario que la genere (la nota estará en el directorio con este mismo nombre)
-    - Cuerpo&emsp;⟶&emsp;Contenido de la nota
-    - Color&emsp;⟶&emsp;Color con la que se mostrará en la interfaz (para esto usaremos *chalk*)
+    - **Título**&emsp;⟶&emsp;Breve texto que nos permitirá identificarla
+    - **Autor**&emsp;⟶&emsp;Usuario que la genere (la nota estará en el directorio con este mismo nombre)
+    - **Cuerpo**&emsp;⟶&emsp;Contenido de la nota
+    - **Color**&emsp;⟶&emsp;Color con la que se mostrará en la interfaz (para esto usaremos *chalk*)
   - El usuario podrá realizar las siguientes operaciones:
-    - Añadir nota&emsp;⟶&emsp;Se añadirá a su directorio
-    - Modificar nota&emsp;⟶&emsp;Se cambiará el antiguo contenido por el nuevo
-    - Eliminar nota&emsp;⟶&emsp;Se eliminará la nota del directorio
-    - Listar sus notas&emsp;⟶&emsp;Se mostrarán todos sus títulos con el color de su respectiva nota
-    - Leer nota&emsp;⟶&emsp;Mostrará el contenido de la nota del color de la misma
+    - **Añadir nota**&emsp;⟶&emsp;Se añadirá a su directorio
+    - **Modificar nota**&emsp;⟶&emsp;Se cambiará el antiguo contenido por el nuevo
+    - **Eliminar nota**&emsp;⟶&emsp;Se eliminará la nota del directorio
+    - **Listar sus notas**&emsp;⟶&emsp;Se mostrarán todos sus títulos con el color de su respectiva nota
+    - **Leer nota**&emsp;⟶&emsp;Mostrará el contenido de la nota del color de la misma
   - Tras cada operación realizada se mostrará un mensaje informativo, tanto en caso de error como en caso de éxito. Los errores serán mostrados en color rojo, los éxitos en color verde.
   - La información se hará persistente, guardándose cada nota con formato JSON. Tendremos que trabajar con el sistema de ficheros.
   - El usuario solo podrá interactuar con la aplicación a través de la línea de comandos, que serán gestionados a través del paquete **yargs**.
@@ -82,10 +82,10 @@ Procedemos a comentar qué soluciones se han llevado a cabo para conseugir los d
     });
 
 - Este comando recibirá cuatro parámetros:
-  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
-  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - \--body&emsp;⟶&emsp;Contenido de la nota **[obligatorio]**
-  - \--color&emsp;⟶&emsp;Color de la nota **[obligatorio]**
+  - **\--title**&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - **\--user**&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - **\--body**&emsp;⟶&emsp;Contenido de la nota **[obligatorio]**
+  - **\--color**&emsp;⟶&emsp;Color de la nota **[obligatorio]**
 
 <br>
 
@@ -169,7 +169,7 @@ Guardamos en la constante json una string en formato JSON, producida llamando a 
     });
 
 - Este comando recibirá un solo parámetro:
-  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - **\--user**&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
 
 <br>
 
@@ -268,8 +268,8 @@ A partir del comando add podemos sacar una serie de herramientas y soluciones pa
     });
 
 - Este comando recibirá dos parámetros:
-  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - **\--user**&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - **\--title**&emsp;⟶&emsp;Título de la nota **[obligatorio]**
 
 <br>
 
@@ -356,8 +356,8 @@ Esquema de decisiones:
     });
 
 - Este comando recibirá dos parámetros:
-  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - **\--user**&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - **\--title**&emsp;⟶&emsp;Título de la nota **[obligatorio]**
 
 <br>
 
@@ -450,8 +450,8 @@ Ahora sí, eso ha sido todo.
 
 <br>
 
-_Desarrollado por Jonay Méndez Márquez_
+_Desarrollado por **Jonay Méndez Márquez**_
 <br>
-_Última actualización: 24/04/2022_ 
+_Última actualización: **24/04/2022**_ 
 <br>
-_Para cualquier duda al respecto: alu0101347141@ull.edu.es_
+_Para cualquier duda al respecto: **alu0101347141@ull.edu.es**_
