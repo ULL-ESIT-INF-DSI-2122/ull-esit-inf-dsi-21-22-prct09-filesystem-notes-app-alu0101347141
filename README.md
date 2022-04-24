@@ -82,10 +82,10 @@ Procedemos a comentar qué soluciones se han llevado a cabo para conseugir los d
     });
 
 - Este comando recibirá cuatro parámetros:
-  - --title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
-  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - --body&emsp;⟶&emsp;Contenido de la nota **[obligatorio]**
-  - --color&emsp;⟶&emsp;Color de la nota **[obligatorio]**
+  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - \--body&emsp;⟶&emsp;Contenido de la nota **[obligatorio]**
+  - \--color&emsp;⟶&emsp;Color de la nota **[obligatorio]**
 
 <br>
 
@@ -169,7 +169,7 @@ Guardamos en la constante json una string en formato JSON, producida llamando a 
     });
 
 - Este comando recibirá un solo parámetro:
-  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
 
 <br>
 
@@ -268,8 +268,8 @@ A partir del comando add podemos sacar una serie de herramientas y soluciones pa
     });
 
 - Este comando recibirá dos parámetros:
-  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - --title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
 
 <br>
 
@@ -356,8 +356,8 @@ Esquema de decisiones:
     });
 
 - Este comando recibirá dos parámetros:
-  - --user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
-  - --title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
+  - \--user&emsp;⟶&emsp;Usuario autor de la nota **[obligatorio]**
+  - \--title&emsp;⟶&emsp;Título de la nota **[obligatorio]**
 
 <br>
 
@@ -437,8 +437,10 @@ Esquema de decisiones:
 <br>
 
 ---
+<br>
+<br>
 
-## Conclusión
+# Conclusión
 
 Terminamos nuestro código con un yargs.parse() y disfrutamos del correcto funcionamiento de la aplicación, cumpliendo con los objetivos propuestos y pudiendo probarlo con tan solo ejecutar los comandos que hemos preparado. Como se han indicado rutas relativas, el directorio *notas/* será creado en el directorio donde se ejecuten los comandos, y bajo esté serán creados los directorios de los usuarios con sus respectivas notas.
 
